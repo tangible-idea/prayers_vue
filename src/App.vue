@@ -62,11 +62,13 @@ const saveSettings = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap; /* 모바일과 PC에서 모두 적용 */
   }
   .description {
     font-size: 0.9em;
     color: #666;
     margin-top: 5px;
+    width: 100%; /* 한 줄로 표시 */
   }
   .switch {
     position: relative;
