@@ -8,13 +8,21 @@ const settings = ref({
 })
 
 const saveSettings = () => {
-  // 여기에 저장 로직 추가
   console.log('Settings saved:', settings.value)
 }
+
+const roomInfo = ref({
+  name: '',
+  id: ''
+})
 </script>
 
 <template>
     <h1>Settings</h1>
+    <div class="room-info">
+      <div>방이름: {{ roomInfo.name }}</div>
+      <div>방ID: {{ roomInfo.id }}</div>
+    </div>
     <div class="toggle">
       <label for="youtubeSummary">
         YouTube 요약
@@ -46,7 +54,8 @@ const saveSettings = () => {
       <div class="description">http://, https:// 등의 링크에 AI가 접속하여 자동으로 요약해줍니다.</div>
     </div>
     <button class="save-button" @click="saveSettings">저장</button>
-    <pre>{{ settings }}</pre>
+    <!-- <pre>{{ settings }}</pre> -->
+
 </template>
 
 <style scoped>
@@ -62,13 +71,13 @@ const saveSettings = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; /* 모바일과 PC에서 모두 적용 */
+    flex-wrap: wrap;
   }
   .description {
     font-size: 0.9em;
     color: #666;
     margin-top: 5px;
-    width: 100%; /* 한 줄로 표시 */
+    width: 100%;
   }
   .switch {
     position: relative;
@@ -130,5 +139,12 @@ const saveSettings = () => {
 
   .save-button:active {
     background-color: #B08F68;
+  }
+
+  .room-info {
+    margin-top: 3px;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+    color: #333;
   }
 </style>
