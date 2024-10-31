@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { supabase } from './lib/supabaseClient'
+import './assets/setting.css'
+import './assets/loading.css'
 
 const settings = ref({
   youtubeSummary: false,
@@ -8,32 +10,106 @@ const settings = ref({
   linkSummary: false
 })
 
-const saveSettings = () => {
-  console.log('Settings saved:', settings.value)
-}
+// roomTag (Global)
+var roomId = '';
 
+// loading state
+const loading = ref(false)
+
+// model const 
 const roomInfo = ref({
   name: '',
   id: ''
 })
 
-const countries = ref([])
+const saveSettings = async () => {
+  try {
+    loading.value= true;
+    console.log('Settings saved:', settings.value)
 
-async function getRoomTitle() {
-  const { data, error } = await supabase.from('kakao_room').select();
-  countries.value = data
+    const { data, error } = await supabase
+      .from('kakao_room')
+      .upsert({
+        room_tag: roomId,
+        setting: JSON.stringify(settings.value)
+      })
+      .select()
+
+    if (error) {
+      console.error('Error saving settings:', error)
+      return;
+    }
+
+    console.log('Upserted data:', data)
+  } catch (error) {
+      console.error('Error parsing settings JSON:', error);
+  } finally {
+    loading.value = false;
+  }
 }
 
+//const rooms = ref([])
+
+function populateSetting(settingFromServer) {
+  try {
+    console.log(settingFromServer);
+    if(settingFromServer == '{}') {
+      return;
+    }
+    settings.value = JSON.parse(settingFromServer);
+  } catch (error) {
+      console.error('Error parsing settings JSON:', error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+/** 
+ * Query from Supabase 
+ */
+async function getRoomTitle() {
+
+  loading.value= true;
+
+  // Extract roomId from the URL
+  const path = window.location.pathname;
+  roomId = path.substring(1); // Remove the leading '/'
+  
+  // Query Supabase with the roomId
+  const { data, error } = await supabase
+    .from('kakao_room')
+    .select()
+    .eq('room_tag', roomId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching room title:', error);
+    return;
+  }
+
+  // set room id from the URL/Supabase
+  roomInfo.value.id = roomId
+  roomInfo.value.name = data.room_title;
+  console.log(data);
+  //rooms.value = data;
+  populateSetting(data.setting)
+}
+
+
 onMounted(() => {
-  getRoomTitle()
+  getRoomTitle();
 })
 </script>
 
 <template>
+  <div>
+    <div v-if="loading" class="overlay">
+      <div class="spinner"></div>
+    </div>
     <h1>Settings</h1>
-    <ul>
-      <li v-for="country in countries" :key="country.room_tag">{{ country.room_title }}</li>
-    </ul>
+    <!-- <ul>
+      <li v-for="room in rooms" :key="room.room_tag">{{ room.room_title }}</li>
+    </ul> -->
     <div class="room-info">
       <div>방이름: {{ roomInfo.name }}</div>
       <div>방ID: {{ roomInfo.id }}</div>
@@ -70,96 +146,5 @@ onMounted(() => {
     </div>
     <button class="save-button" @click="saveSettings">저장</button>
     <!-- <pre>{{ settings }}</pre> -->
-
+  </div>
 </template>
-
-<style scoped>
-  .toggle {
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  label {
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .description {
-    font-size: 0.9em;
-    color: #666;
-    margin-top: 5px;
-    width: 100%;
-  }
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
-  }
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: 0.4s;
-    border-radius: 24px;
-  }
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
-  }
-  input:checked + .slider {
-    background-color: #D2B48C;
-  }
-  input:checked + .slider:before {
-    transform: translateX(26px);
-  }
-
-  .save-button {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    background-color: #D2B48C;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-  .save-button:hover {
-    background-color: #C1A378;
-  }
-
-  .save-button:active {
-    background-color: #B08F68;
-  }
-
-  .room-info {
-    margin-top: 3px;
-    margin-bottom: 15px;
-    font-size: 0.9em;
-    color: #333;
-  }
-</style>
