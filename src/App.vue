@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { supabase } from './lib/supabaseClient'
 
 const settings = ref({
   youtubeSummary: false,
@@ -15,10 +16,24 @@ const roomInfo = ref({
   name: '',
   id: ''
 })
+
+const countries = ref([])
+
+async function getRoomTitle() {
+  const { data, error } = await supabase.from('kakao_room').select();
+  countries.value = data
+}
+
+onMounted(() => {
+  getRoomTitle()
+})
 </script>
 
 <template>
     <h1>Settings</h1>
+    <ul>
+      <li v-for="country in countries" :key="country.room_tag">{{ country.room_title }}</li>
+    </ul>
     <div class="room-info">
       <div>방이름: {{ roomInfo.name }}</div>
       <div>방ID: {{ roomInfo.id }}</div>
