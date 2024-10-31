@@ -8,7 +8,9 @@
   },
   "dependencies": {
     "vue": "^3.2.37",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "@supabase/supabase-js": "^2.46.1"
+
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.1",
