@@ -1,25 +1,14 @@
-# Stage 1: Build the project
-FROM node:16-alpine AS build-stage
+# Use the official Node.js image as the base image
+FROM node:18
 
-# Set working directory
-WORKDIR /app
+# Set the working directory in the container
+WORKDIR /src
 
-# Install dependencies
-COPY package*.json ./
+# Copy the application files into the working directory
+COPY . /src
+
+# Install the application dependencies
 RUN npm install
 
-# Copy project files and build the project
-COPY . .
-RUN npm run build
-
-# Stage 2: Serve the project
-FROM nginx:alpine AS production-stage
-
-# Copy the build output to the Nginx html directory
-COPY --from=build-stage /app/dist /usr/share/nginx/html
-
-# Expose port 80
-EXPOSE 80
-
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Define the entry point for the container
+CMD ["npm", "start"]
