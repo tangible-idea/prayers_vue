@@ -106,7 +106,7 @@ onMounted(() => {
     <div v-if="loading" class="overlay">
       <div class="spinner"></div>
     </div>
-    <h1>Settings</h1>
+    <h1>Settings 222</h1>
     <!-- <ul>
       <li v-for="room in rooms" :key="room.room_tag">{{ room.room_title }}</li>
     </ul> -->
